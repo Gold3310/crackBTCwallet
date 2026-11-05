@@ -72,7 +72,7 @@ one-provider rule.
 | Repo | Stars | Licence | Last push | What it is |
 | --- | --- | --- | --- | --- |
 | [gurnec/btcrecover](https://github.com/gurnec/btcrecover) | 1,596 | **GPL-2.0** | 2024-08-02 | Password/seed recovery for wallet.dat, Electrum, BIP38, and more |
-| [jackjack-jj/pywallet](https://github.com/jackjack-jj/pywallet) | 534 | none stated | 2023-10-01 | `--dumpwallet`: dumps keys from BerkeleyDB wallet.dat; **explicitly recommended by btcrecover's own docs** |
+| [jackjack-jj/pywallet](https://github.com/jackjack-jj/pywallet) | 534 | none stated | 2023-10-01 | `--dumpwallet`: dumps keys from BerkeleyDB wallet.dat; **explicitly recommended by btcrecover's own docs** — **adopted**, see `docs/CROSSCHECK.md` |
 | [1200wd/bitcoinlib](https://github.com/1200wd/bitcoinlib) | 697 | **AGPL-3.0** | 2026-10-29 | Key derivation, addresses, HD wallets |
 | [petertodd/python-bitcoinlib](https://github.com/petertodd/python-bitcoinlib) | 1,946 | MIT | 2025-03-14 | Scripts, addresses, keys — MIT, safe to depend on |
 
@@ -111,7 +111,8 @@ against the committed fixtures, never against a freshly created Core wallet.
 1. **Nothing in the policy layer.** `policy.py` has no upstream equivalent that does
    "Alchemy Ethereum mainnet only" as a pre-flight refusal; every candidate is
    vendor-neutral by design.
-2. **Cross-check, don't replace.** pywallet for key extraction, `cast` for tx inspection
-   when installed — both as optional external tools, both documented above.
+2. **Cross-check, don't replace.** Implemented: `tools/crosscheck.py` + `docs/CROSSCHECK.md`
+   compares our recovered key set against pywallet or `bitcoin-cli dumpwallet` (or a saved
+   dump, offline). `cast` remains optional for tx inspection.
 3. **Chainbench only for load work**, behind the policy gate.
 4. **Never vendor GPL-2.0/AGPL-3.0** (`btcrecover`, `bitcoinlib`); this repo is MIT.

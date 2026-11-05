@@ -1,3 +1,12 @@
+Unreleased - cross-check against a second implementation
+- tools/crosscheck.py: compares the keys we recover with pywallet --dumpwallet, bitcoin-cli
+  dumpwallet, or a saved dump; names compression-flag differences specifically; --address
+  catches "keys agree but control the wrong address"; --strict available; 20 offline checks
+- tests/crosscheck-e2e.sh: 11 checks over the CLI exit codes with synthetic fixtures
+- docs/CROSSCHECK.md: semantics, honest limits, and the fact it was validated against
+  pywallet's source structure and fixtures, not a live pywallet run (no bsddb3/bitcoind here)
+- verify-all.sh now runs 8 suites; tasks.mk gains `make crosscheck`
+
 Unreleased - prior art survey, Makefile entry points, regtest runtime
 - docs/PRIOR-ART.md: searched GitHub for projects covering each component we built
   (benchmarking, tx inspection, RPC failover, wallet.dat extraction, runtimes) with
