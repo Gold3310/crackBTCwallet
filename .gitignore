@@ -1,0 +1,12 @@
+# build output (regenerate with `make` or `make noaesni`)
+*.o
+crackbtcshell
+get_mkey_ckey
+tested_aes
+
+# local test data
+tests/out_*
+data.md
+
+# python caches
+__pycache__/

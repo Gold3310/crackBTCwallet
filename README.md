@@ -187,3 +187,27 @@ Well, is not complicated but maybe this is not for you.
 
 Kinds regards!
 #### AlbertoBSD
+
+## Testing the tool (added)
+
+A full, reproducible test guide lives in [`docs/TESTING.md`](docs/TESTING.md), with a
+verification log in [`docs/verification-log.txt`](docs/verification-log.txt).
+
+You do **not** need Bitcoin Core, or any wallet file, to exercise the whole pipeline:
+
+```
+python3 tools/make_test_vector.py --seed demo-1 --commands | ./crackbtcshell
+```
+
+That fabricates a ckey with a known answer, then recovers it through `try key` →
+`doublesha256` → `aesdecrypt` → `privatekeytowif`.
+
+With Bitcoin Core installed, `./tools/make_test_wallet.sh` creates a throwaway **testnet**
+wallet (legacy BerkeleyDB format, which `get_mkey_ckey` requires) encrypted with a passphrase
+you know, in an isolated datadir, and prints the exact commands to run.
+
+`tools/verify_key.py` proves a recovered key really belongs to a wallet by deriving both
+address forms and comparing with the address `get_mkey_ckey` printed — necessary because the
+padding check alone cannot detect a wrong IV (see `docs/TESTING.md`).
+
+Only ever test wallets you created yourself. Build without yasm using `make noaesni`.
