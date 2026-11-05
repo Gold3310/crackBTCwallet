@@ -1,3 +1,13 @@
+Unreleased - prior art survey, Makefile entry points, regtest runtime
+- docs/PRIOR-ART.md: searched GitHub for projects covering each component we built
+  (benchmarking, tx inspection, RPC failover, wallet.dat extraction, runtimes) with
+  stars/licence/last-push, a keep/adopt verdict per component, and MIT-vs-GPL notes
+- tasks.mk: one-word entry points (verify, policy, bench, inspect, regtest, act, wallets),
+  included from the PoC Makefile with -include; no existing target replaced
+- tests/runner-guard.sh: +3 guards (PoC make targets intact, Makefile includes tasks.mk)
+- docs/PRIOR-ART.md documents running this on act / Codespaces / a regtest container,
+  since the sandbox cannot reach Alchemy
+
 Unreleased - runnable everywhere, placeholder-proof
 - Added run-bench.sh: one command (policy gate -> benchmark -> summary), distinct exit
   codes for unset (2), off-policy (3) and no-measurements (1)

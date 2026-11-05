@@ -27,6 +27,11 @@ check_exit "Alchemy testnet is refused" 3 $?
 
 [ -x run-bench.sh ]; check_exit "run-bench.sh is executable" 0 $?
 
+# Regression guard: the PoC build must keep working. tasks.mk is included, never a replacement.
+make -n noaesni >/dev/null 2>&1; check_exit "PoC target 'make noaesni' still builds" 0 $?
+grep -q '^-include tasks.mk' Makefile; check_exit "Makefile includes tasks.mk instead of replacing it" 0 $?
+grep -q '^noaesni:' Makefile; check_exit "PoC 'noaesni' target still defined in Makefile" 0 $?
+
 echo
 echo "passed: $pass, failed: $fail"
 [ "$fail" -eq 0 ]
