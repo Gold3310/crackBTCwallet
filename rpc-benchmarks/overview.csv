@@ -1,0 +1,80 @@
+chain,region,provider,avg_ms,p50_ms,p95_ms,success_pct
+EVM Overall,Global,Alchemy,13.60,6.34,28.46,99.99
+EVM Overall,Global,Goldsky,21.88,7.93,78.11,100
+EVM Overall,Global,QuickNode,39.69,9.47,157.56,99.99
+EVM Overall,Global,dRPC,91.80,24.03,531.53,99.99
+EVM Overall,US East,Alchemy,8.03,5.55,16.52,100
+EVM Overall,US East,QuickNode,10.77,6.41,18.59,100
+EVM Overall,US East,Goldsky,15.34,8.35,53.40,100
+EVM Overall,US East,dRPC,35.29,9.93,149.92,99.99
+EVM Overall,US West,Alchemy,14.96,9.08,45.93,100
+EVM Overall,US West,Goldsky,18.55,7.26,79.78,100
+EVM Overall,US West,QuickNode,79.30,80.60,222.78,99.99
+EVM Overall,US West,dRPC,135.29,47.53,629.87,99.99
+EVM Overall,EU Central,QuickNode,8.15,5.48,32.95,100
+EVM Overall,EU Central,Alchemy,13.04,5.98,55.32,99.99
+EVM Overall,EU Central,Goldsky,16.61,7.80,49.90,100
+EVM Overall,EU Central,dRPC,27.94,17.15,67.64,99.98
+EVM Overall,AP Southeast,Alchemy,18.36,5.78,31.67,100
+EVM Overall,AP Southeast,Goldsky,37.03,8.41,178.62,100
+EVM Overall,AP Southeast,QuickNode,60.53,55.95,238.14,100
+EVM Overall,AP Southeast,dRPC,168.65,9.35,794.65,99.99
+Ethereum,Global,Goldsky,8.25,5.54,16.32,100
+Ethereum,Global,Alchemy,8.28,5.80,17.01,99.99
+Ethereum,Global,QuickNode,34.16,8.53,127.30,100
+Ethereum,Global,dRPC,192.55,40.89,827.50,99.99
+Ethereum,US East,Alchemy,7.31,5.27,10.23,100
+Ethereum,US East,Goldsky,7.50,5.31,11.73,100
+Ethereum,US East,QuickNode,10.97,5.71,18.26,100
+Ethereum,US East,dRPC,64.51,24.09,266.91,99.99
+Ethereum,US West,Goldsky,7.49,5.27,10.40,100
+Ethereum,US West,Alchemy,10.86,8.16,19.13,100
+Ethereum,US West,QuickNode,81.82,76.69,146.14,100
+Ethereum,US West,dRPC,295.47,149.28,797.35,99.99
+Ethereum,EU Central,QuickNode,3.79,5.10,9.70,100
+Ethereum,EU Central,Alchemy,8.38,5.41,14.42,99.97
+Ethereum,EU Central,Goldsky,9.82,5.78,18.30,100
+Ethereum,EU Central,dRPC,44.37,30.52,121.35,99.98
+Ethereum,AP Southeast,Alchemy,6.57,5.20,9.89,100
+Ethereum,AP Southeast,Goldsky,8.16,5.85,17.83,100
+Ethereum,AP Southeast,QuickNode,40.06,50.08,95.59,100
+Ethereum,AP Southeast,dRPC,365.82,271.96,966.08,99.99
+Optimism,Global,Alchemy,24.71,8.31,121.88,100
+Optimism,Global,Goldsky,42.90,26.89,99.95,100
+Optimism,Global,QuickNode,49.74,14.40,235.03,99.99
+Optimism,Global,dRPC,83.42,34.53,280.91,99.99
+Optimism,US East,Alchemy,9.58,6.32,20.34,100
+Optimism,US East,QuickNode,11.48,8.36,19.12,100
+Optimism,US East,Goldsky,27.76,21.97,67.93,100
+Optimism,US East,dRPC,36.41,19.31,145.58,99.99
+Optimism,US West,Alchemy,23.45,14.58,77.24,100
+Optimism,US West,Goldsky,37.09,27.76,94.34,100
+Optimism,US West,QuickNode,95.50,89.03,269.37,99.99
+Optimism,US West,dRPC,98.69,88.72,229.15,100
+Optimism,EU Central,QuickNode,5.12,5.45,14.59,100
+Optimism,EU Central,dRPC,23.28,17.20,60.79,99.99
+Optimism,EU Central,Alchemy,23.52,7.95,119.84,100
+Optimism,EU Central,Goldsky,27.93,25.46,65.88,100
+Optimism,AP Southeast,Alchemy,42.30,7.59,249.71,100
+Optimism,AP Southeast,Goldsky,78.82,41.42,273.03,100
+Optimism,AP Southeast,QuickNode,86.88,73.02,269.89,100
+Optimism,AP Southeast,dRPC,175.31,203.98,374.16,99.99
+Arbitrum,Global,Alchemy,7.88,5.59,15.78,100
+Arbitrum,Global,Goldsky,13.16,6.13,33.09,100
+Arbitrum,Global,dRPC,24.31,13.05,68.46,99.99
+Arbitrum,Global,QuickNode,38.59,9.77,98.82,99.99
+Solana,Global,Alchemy,7.92,5.39,13.95,100
+Solana,Global,QuickNode,12.29,7.10,32.99,100
+Solana,Global,Triton,13.38,6.90,44.55,99.99
+Solana,Global,Chainstack,17.70,7.64,45.88,100
+Solana,Global,Helius,36.36,25.65,97.84,100
+Solana,US East,Alchemy,6.08,5.10,9.68,100
+Solana,US East,Triton,8.23,5.17,9.82,99.99
+Solana,US East,QuickNode,8.29,5.37,13.35,100
+Solana,US East,Chainstack,14.75,6.38,56.54,100
+Solana,US East,Helius,24.38,20.94,48.62,100
+Solana,US West,Alchemy,9.53,5.66,16.41,100
+Solana,US West,QuickNode,30.31,27.81,34.84,100
+Solana,US West,Triton,36.42,35.27,48.88,100
+Solana,US West,Chainstack,36.88,28.54,82.40,100
+Solana,US West,Helius,56.85,46.20,109.44,100

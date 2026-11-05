@@ -1,0 +1,6 @@
+chain,region,weight
+EVM Overall,US East,0.40
+EVM Overall,US West,0.15
+EVM Overall,EU Central,0.25
+EVM Overall,AP Southeast,0.10
+Solana,US East,0.10

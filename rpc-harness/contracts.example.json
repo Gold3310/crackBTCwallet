@@ -1,0 +1,59 @@
+{
+  "_comment": "Replace address/topics/block_range with the contract you care about. Placeholders: ${address} ${from} ${to} ${topic:NAME}",
+  "chain_id": 1,
+  "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+  "block_range": [
+    20000000,
+    20001000
+  ],
+  "topics": {
+    "Transfer": "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+    "Approval": "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925"
+  },
+  "methods": [
+    {
+      "name": "eth_blockNumber",
+      "params": []
+    },
+    {
+      "name": "eth_getBalance",
+      "params": [
+        "${address}",
+        "latest"
+      ]
+    },
+    {
+      "name": "eth_getCode",
+      "params": [
+        "${address}",
+        "latest"
+      ]
+    },
+    {
+      "name": "eth_call_decimals",
+      "method": "eth_call",
+      "params": [
+        {
+          "to": "${address}",
+          "data": "0x313ce567"
+        },
+        "latest"
+      ]
+    },
+    {
+      "name": "eth_getLogs_Transfer_1000blocks",
+      "method": "eth_getLogs",
+      "params": [
+        {
+          "address": "${address}",
+          "fromBlock": "${from}",
+          "toBlock": "${to}",
+          "topics": [
+            "${topic:Transfer}"
+          ]
+        }
+      ]
+    }
+  ],
+  "_policy": "chain_id must stay 1: policy is Alchemy Ethereum mainnet only. This address is USDC on mainnet - replace it with yours."
+}

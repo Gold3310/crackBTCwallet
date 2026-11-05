@@ -1,0 +1,86 @@
+name: RPC provider benchmark (Alchemy mainnet only)
+
+# Runs where egress exists (GitHub-hosted runners), because the Arena sandbox
+# cannot reach provider endpoints at all. The endpoint URL - which contains the
+# API key - comes from a repository secret and is never committed.
+#
+# Access policy: this workflow refuses anything that is not Ethereum mainnet on
+# Alchemy. See rpc-harness/policy.py; the policy check below fails the job.
+
+on:
+  workflow_dispatch:
+    inputs:
+      contract_address:
+        description: "Ethereum mainnet contract address to benchmark against (0x...)"
+        required: true
+      block_from:
+        description: "First block for getLogs"
+        required: true
+        default: "20000000"
+      block_to:
+        description: "Last block for getLogs"
+        required: true
+        default: "20001000"
+      requests:
+        description: "Requests per method"
+        required: true
+        default: "30"
+
+jobs:
+  bench:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Access policy self-test (no network needed)
+        run: python3 rpc-harness/policy.py --self-test
+
+      - name: Enforce Alchemy mainnet on the configured endpoint
+        env:
+          ALCHEMY_URL: ${{ secrets.ALCHEMY_URL }}
+        run: |
+          if [ -z "$ALCHEMY_URL" ]; then
+            echo "::error::ALCHEMY_URL secret is not set. Add it under Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+          python3 rpc-harness/policy.py --check "$ALCHEMY_URL"
+
+      - name: Harness self-test
+        run: python3 rpc-harness/bench.py --selftest
+
+      - name: Build contract config (mainnet, chain id 1)
+        env:
+          ADDRESS: ${{ inputs.contract_address }}
+          FROM: ${{ inputs.block_from }}
+          TO: ${{ inputs.block_to }}
+        run: |
+          python3 - <<'PY'
+          import json, os
+          cfg = json.load(open("rpc-harness/contracts.example.json"))
+          cfg["chain_id"] = 1
+          cfg["address"] = os.environ["ADDRESS"]
+          cfg["block_range"] = [int(os.environ["FROM"]), int(os.environ["TO"])]
+          json.dump(cfg, open("contracts.ci.json", "w"), indent=2)
+          print("chain_id", cfg["chain_id"], "address", cfg["address"])
+          PY
+
+      - name: Run benchmark
+        env:
+          ALCHEMY_URL: ${{ secrets.ALCHEMY_URL }}
+        run: |
+          python3 rpc-harness/bench.py \
+            --providers rpc-harness/providers.example.json \
+            --contract contracts.ci.json \
+            --requests "${{ inputs.requests }}" \
+            --out runs/ci
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rpc-benchmark-results
+          path: runs/ci/
+
+      - name: Publish summary
+        run: cat runs/ci/summary.md >> "$GITHUB_STEP_SUMMARY"

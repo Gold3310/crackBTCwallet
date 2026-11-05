@@ -1,0 +1,108 @@
+crackBTCwallet verification log
+generated: 2026-11-05T16:15:54Z on Linux 6.1.158+ x86_64
+gcc: gcc (Debian 12.2.0-14+deb12u1) 12.2.0
+
+=== 1. build (make noaesni - gcc only, no yasm) ===
+gcc -Wall -O3 -fPIC -c ctaes/ctaes.c -o ctaes.o
+gcc -Wall -O3 -c sha512.c -o sha512.o
+gcc -Wall -O3 -c sha256.c -o sha256.o
+gcc -Wall -O3 -c base58.c -o base58.o
+gcc -Wall -O3 -c rmd160.c -o rmd160.o
+gcc -Wall -c crackbtcshell_noaesni.c -o crackbtcshell.o
+gcc -O3 -o get_mkey_ckey get_mkey_ckey.c base58.o sha256.o rmd160.o
+gcc -o crackbtcshell crackbtcshell.o ctaes.o sha512.o sha256.o base58.o -pthread
+PASS  make noaesni
+
+=== 2. command set present in the noaesni build ===
+PASS  command 'start' registered in both builds
+PASS  command 'try' registered in both builds
+PASS  command 'load' registered in both builds
+PASS  command 'set' registered in both builds
+PASS  command 'extractmkey' registered in both builds
+PASS  command 'keyderivation' registered in both builds
+PASS  command 'aesdecrypt' registered in both builds
+PASS  command 'doublesha256' registered in both builds
+PASS  command 'privatekeytowif' registered in both builds
+PASS  command 'stats' registered in both builds
+
+=== 3. README reference vector ===
+PASS  key found
+PASS  IV derivation
+PASS  decrypted ckey
+PASS  WIF uncompressed
+PASS  WIF compressed
+Developed by AlbertoBSD. I wish you very good luck!!
+crackBTC > crackBTC > Expected block: 332d7f0a3e7bdb5e9327cfb20f1ab843
+Adding 2e24da42feb389aab372163cac88c5b9233d6f1a2e6bcb4e8337dfa21f0aa85309fa70c00637474a88b0d881c4d93155 to the list
+crackBTC > Posible Key found
+key_material: 563758754506d53828c5383d2cb6296efe7f217c5ef6a84b13bce3ecec66da2e
+For ckey or mkey: 2e24da42feb389aab372163cac88c5b9233d6f1a2e6bcb4e8337dfa21f0aa85309fa70c00637474a88b0d881c4d93155
+crackBTC > double sha256: 35fc5f8253f1bcf2c185571a35413f1f8a1816ee02360f36d0bd6339755f93f5
+crackBTC > decrypt_iv 35fc5f8253f1bcf2c185571a35413f1f
+decrypt_key 563758754506d53828c5383d2cb6296efe7f217c5ef6a84b13bce3ecec66da2e
+decrypt_enc 2e24da42feb389aab372163cac88c5b9233d6f1a2e6bcb4e8337dfa21f0aa85309fa70c00637474a88b0d881c4d93155
+len: 48
+Decrypted: 3ea5eaabe7f7b997ce732acc9cf08315a805109003ce2bd918bac1b73b82d7b710101010101010101010101010101010
+crackBTC > Private KEY uncompressed 5JHsqscg3o1iAWjRP83nWWJFbgMrjnXwVQoxejtAqp4t6cCVgbo
+Private KEY compressed KyKVQiQTML68gzEEce7HsEK9S4j4XqyZWQ6GdaGrSSk8XZJHqNWe
+crackBTC > 
+=== 4. self-generated vector (seed demo-1) ===
+PASS  key found
+PASS  recovered key
+Developed by AlbertoBSD. I wish you very good luck!!
+crackBTC > crackBTC > Expected block: f0d170def2c9b1d232fa80a859027c15
+Adding 7ad287e43fe46cdc291233d0e50cef84e0c160cee2d9a1c222ea90b849126c05b119fed3f8f03dc06f04e9b5fc0265cd to the list
+crackBTC > Posible Key found
+key_material: 81eefdbd01a97771c159aaf79ad9b5b8040829faddb2ec1ef1f1bf26627bfa4e
+For ckey or mkey: 7ad287e43fe46cdc291233d0e50cef84e0c160cee2d9a1c222ea90b849126c05b119fed3f8f03dc06f04e9b5fc0265cd
+crackBTC > double sha256: 42eb6fd318fe4cfdad6baf6b624d9294b04d995ad38aa0456c7ad02911ec6ebd
+crackBTC > decrypt_iv 42eb6fd318fe4cfdad6baf6b624d9294
+decrypt_key 81eefdbd01a97771c159aaf79ad9b5b8040829faddb2ec1ef1f1bf26627bfa4e
+decrypt_enc 7ad287e43fe46cdc291233d0e50cef84e0c160cee2d9a1c222ea90b849126c05b119fed3f8f03dc06f04e9b5fc0265cd
+len: 48
+Decrypted: 31c011efa9fffbcee0c065c359d8fb07d6cfab0c69eadb095d9267261514daa710101010101010101010101010101010
+crackBTC > Private KEY uncompressed 5JCCPK19uuHcesLPWw1PbeGN7bkUcn62nb8KMvx3aXyBHxpee7n
+Private KEY compressed KxtRFUTgLVnLN9AaP7NijuUpC8Nttv1CtDdJ3P7xP1gxRfKx4RLt
+crackBTC > 
+=== 5. WIF cross-check with the independent implementation ===
+private key      31c011efa9fffbcee0c065c359d8fb07d6cfab0c69eadb095d9267261514daa7
+network          mainnet
+compressed      address 1PMJjadXKH5H9bekXgU9Luhg6yMVSqqx5y   WIF KxtRFUTgLVnLN9AaP7NijuUpC8Nttv1CtDdJ3P7xP1gxRfKx4RLt
+uncompressed    address 1LAffqkjSHbFzJ8sJjGEPTxeg3sdTH2Hk6   WIF 5JCCPK19uuHcesLPWw1PbeGN7bkUcn62nb8KMvx3aXyBHxpee7n
+PASS  compressed WIF agrees
+PASS  uncompressed WIF agrees
+
+=== 6. negative test - wrong keys must not be accepted ===
+/tmp/tmp.3YFA8ioDvv
+PASS  false positives on two wrong keys
+
+=== 7. wrong IV with correct key (documented defect) ===
+Decrypted: 732b7e3cb101b7334dabcaa83b956993d6cfab0c69eadb095d9267261514daa710101010101010101010101010101010
+PASS  padding survives a wrong IV (sixteen 0x10 bytes still validate)
+PASS  wrong IV corrupts the first 16 bytes while padding still validates
+
+=== 8. verify_key.py address logic round-trips ===
+match
+PASS  hash160(pubkey) equals address payload
+
+=== 9. make_test_wallet.sh preflight without Bitcoin Core ===
+ERROR: 'bitcoind' not found.
+
+This script needs Bitcoin Core on the machine you run it from. Install it first:
+
+  Ubuntu/Debian   sudo add-apt-repository ppa:bitcoin/bitcoin && sudo apt install bitcoind
+  macOS           brew install bitcoin
+  Windows         download the installer from bitcoincore.org
+  Docker          docker run -d --name btc -p 18332:18332 ruimarinho/bitcoin-core \
+                    -testnet -rpcuser=u -rpcpassword=p -rpcallowip=0.0.0.0/0 -fallbackfee=0.0001
+
+Note: the analysis in docs/TESTING.md does NOT require Bitcoin Core - the
+self-generated test vector (tools/make_test_vector.py) covers the whole pipeline.
+PASS  fails fast with install instructions
+
+=== 10. wallet.dat format sniffing is implemented ===
+PASS  SQLite wallets rejected before parsing
+
+=== summary ===
+passed: 26   failed: 0
+log: docs/verification-log.txt

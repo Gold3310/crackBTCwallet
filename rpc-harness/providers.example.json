@@ -1,0 +1,5 @@
+{
+  "_policy": "Alchemy Ethereum mainnet only. Enforced by policy.py - non-Alchemy hosts, Alchemy testnets, plaintext http and keyless URLs are refused before any request.",
+  "_comment": "The URL (and therefore the API key) comes from an environment variable, never from this file.",
+  "alchemy": { "url_env": "ALCHEMY_URL" }
+}
