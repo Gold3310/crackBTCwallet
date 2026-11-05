@@ -57,3 +57,19 @@ is the evidence behind the provider decision; the *access* policy is what is enf
 A convention dies the first time someone pastes a QuickNode URL into a config to "just test
 something", and then the result gets compared against Alchemy numbers measured on a
 different chain. The gate makes that a loud failure instead of a silent, wrong number.
+
+## Where it runs (added)
+
+| Trigger | How | Notes |
+| --- | --- | --- |
+| Manual, local | `./run-bench.sh` | one command: policy gate → benchmark → summary; refuses unset/placeholder endpoints with exit 2, off-policy with exit 3 |
+| Manual, runner | Actions → *Run workflow*, or `gh workflow run rpc-bench.yml` | inputs default to USDC mainnet + block 20000000–20001000 |
+| Timer, runner | set repository **variable** `RPC_BENCH_SCHEDULE=on` | then every 6 hours; opt-in so a missing secret cannot create failing runs nobody asked for |
+
+A **placeholder guard** was added after a near-miss: a markdown-wrapped URL
+(`[https://…/v2/<key>](https://…/v2/<key>)`) or a documentation placeholder would previously
+have been stored as the secret and failed deep inside the run. Both are now refused up front,
+by `policy.py` and again by `run-bench.sh`, with an error that names the real problem.
+
+`tests/runner-guard.sh` locks that behaviour in — six checks covering unset, placeholder,
+markdown link, off-policy vendor, Alchemy testnet, and executability.

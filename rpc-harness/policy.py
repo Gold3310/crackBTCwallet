@@ -115,6 +115,14 @@ def check_endpoint(url: str, allow_loopback: bool = False):
     if "/v2/" not in path:
         return False, "no /v2/<key> path: public or keyless URLs are not attributable - use your project endpoint"
     key = path.split("/v2/", 1)[1].strip("/")
+
+    # Catch the mistake people actually make first: pasting a documentation
+    # placeholder or a markdown-wrapped URL, so the message names the real problem.
+    if any(char in key for char in "<>[](){} \t\n") or key.lower() in (
+            "key", "your-key", "yourkey", "api-key", "apikey", "your_api_key", "demo"):
+        return False, ("API key looks like a placeholder (%r). Use your real project URL "
+                       "https://eth-mainnet.g.alchemy.com/v2/<40-char-key>" % key[:24])
+
     if len(key) < 8:
         return False, "API key in the URL looks too short (%d chars)" % len(key)
 
@@ -170,6 +178,10 @@ def self_test() -> int:
         "plain http": "http://eth-mainnet.g.alchemy.com/v2/abcdefgh12345678",
         "keyless alchemy": "https://eth-mainnet.g.alchemy.com/v2/",
         "short key": "https://eth-mainnet.g.alchemy.com/v2/abc",
+        "placeholder <key>": "https://eth-mainnet.g.alchemy.com/v2/<key>",
+        "placeholder your-key": "https://eth-mainnet.g.alchemy.com/v2/your-key",
+        "markdown-wrapped URL": "https://eth-mainnet.g.alchemy.com/v2/[https://eth-mainnet.g.alchemy.com/v2/abc]",
+        "space in key": "https://eth-mainnet.g.alchemy.com/v2/abc def ghi jkl",
         "loopback": "http://127.0.0.1:8545",
         "empty": "",
     }

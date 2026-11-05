@@ -1,3 +1,12 @@
+Unreleased - runnable everywhere, placeholder-proof
+- Added run-bench.sh: one command (policy gate -> benchmark -> summary), distinct exit
+  codes for unset (2), off-policy (3) and no-measurements (1)
+- Workflow gains an opt-in 6-hourly schedule (repository variable RPC_BENCH_SCHEDULE=on),
+  a concurrency group, timeouts, default inputs for scheduled runs, and calls run-bench.sh
+- policy.py now rejects documentation placeholders and markdown-wrapped URLs before the
+  key-length check, so the error names the real mistake (45 assertions)
+- Added tests/runner-guard.sh (6 checks); verify-all.sh now runs 6 suites
+
 Unreleased - access policy (Alchemy mainnet only)
 - Added rpc-harness/policy.py: https + *.alchemy.com + eth-mainnet host + /v2/<key> +
   chain_id 1, enforced before any request; 37 self-test assertions
