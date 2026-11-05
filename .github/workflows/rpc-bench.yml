@@ -1,0 +1,69 @@
+name: RPC provider benchmark
+
+# Runs where egress exists (GitHub-hosted runners), because the Arena sandbox
+# cannot reach provider endpoints at all. The endpoint URL - which contains your
+# API key - comes from a repository secret and is never committed.
+
+on:
+  workflow_dispatch:
+    inputs:
+      contract_address:
+        description: "Contract address to benchmark against (0x...)"
+        required: true
+      block_from:
+        description: "First block for getLogs"
+        required: true
+        default: "20000000"
+      block_to:
+        description: "Last block for getLogs"
+        required: true
+        default: "20001000"
+      requests:
+        description: "Requests per method per provider"
+        required: true
+        default: "30"
+
+jobs:
+  bench:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Harness self-test (no network needed)
+        run: python3 rpc-harness/bench.py --selftest
+
+      - name: Build contract config
+        env:
+          ADDRESS: ${{ inputs.contract_address }}
+          FROM: ${{ inputs.block_from }}
+          TO: ${{ inputs.block_to }}
+        run: |
+          python3 - <<'PY'
+          import json, os
+          cfg = json.load(open("rpc-harness/contracts.example.json"))
+          cfg["address"] = os.environ["ADDRESS"]
+          cfg["block_range"] = [int(os.environ["FROM"]), int(os.environ["TO"])]
+          json.dump(cfg, open("contracts.ci.json", "w"), indent=2)
+          PY
+
+      - name: Run benchmark
+        env:
+          ALCHEMY_URL: ${{ secrets.ALCHEMY_URL }}
+          QUICKNODE_URL: ${{ secrets.QUICKNODE_URL }}
+        run: |
+          python3 rpc-harness/bench.py \
+            --providers rpc-harness/providers.example.json \
+            --contract contracts.ci.json \
+            --requests "${{ inputs.requests }}" \
+            --out runs/ci
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rpc-benchmark-results
+          path: runs/ci/
+
+      - name: Publish summary
+        run: cat runs/ci/summary.md >> "$GITHUB_STEP_SUMMARY"

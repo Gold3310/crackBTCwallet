@@ -1,0 +1,7 @@
+{
+  "_comment": "URLs (and therefore API keys) come from environment variables - never from this file.",
+  "alchemy":    { "url_env": "ALCHEMY_URL" },
+  "quicknode":  { "url_env": "QUICKNODE_URL" },
+  "drpc":       { "url_env": "DRPC_URL" },
+  "goldsky":    { "url_env": "GOLDSKY_URL" }
+}
