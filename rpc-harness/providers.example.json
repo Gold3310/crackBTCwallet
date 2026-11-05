@@ -1,7 +1,5 @@
 {
-  "_comment": "URLs (and therefore API keys) come from environment variables - never from this file.",
-  "alchemy":    { "url_env": "ALCHEMY_URL" },
-  "quicknode":  { "url_env": "QUICKNODE_URL" },
-  "drpc":       { "url_env": "DRPC_URL" },
-  "goldsky":    { "url_env": "GOLDSKY_URL" }
+  "_policy": "Alchemy Ethereum mainnet only. Enforced by policy.py - non-Alchemy hosts, Alchemy testnets, plaintext http and keyless URLs are refused before any request.",
+  "_comment": "The URL (and therefore the API key) comes from an environment variable, never from this file.",
+  "alchemy": { "url_env": "ALCHEMY_URL" }
 }

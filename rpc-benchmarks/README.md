@@ -75,3 +75,10 @@ Only `curl` + Python 3.8+ standard library. No `pip install` step.
   Robinhood Chain, Arbitrum's other regions, Solana EU/AP.
 - **Known gaps in the source itself:** P95 only (no P99), read-only synthetic payloads,
   warmed connections, no WebSockets or writes, no pricing, four EVM providers.
+
+## Relationship to the access policy
+
+This folder is **published-data analysis**, not network access: nothing here contacts
+QuickNode, dRPC or Goldsky. Runtime access in this repository is restricted to Alchemy
+Ethereum mainnet — see [`../docs/ACCESS-POLICY.md`](../docs/ACCESS-POLICY.md). The
+comparison stays because it is the evidence behind the provider decision.

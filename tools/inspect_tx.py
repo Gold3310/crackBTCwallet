@@ -10,10 +10,9 @@ Usage
 -----
     python3 tools/inspect_tx.py --tx 0xabc... --tx 0xdef...
 
-    # custom endpoints (comma separated or repeated --endpoint)
-    python3 tools/inspect_tx.py --tx 0xabc... \
-        --endpoint https://eth.drpc.org \
-        --endpoint https://ethereum-rpc.publicnode.com
+    # endpoint comes from ALCHEMY_URL (Alchemy Ethereum mainnet only)
+    export ALCHEMY_URL='https://eth-mainnet.g.alchemy.com/v2/<key>'
+    python3 tools/inspect_tx.py --tx 0xabc...
 
     # machine-readable output
     python3 tools/inspect_tx.py --tx 0xabc... --json out.json
@@ -34,6 +33,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import time
 import urllib.error
@@ -41,15 +41,30 @@ import urllib.request
 from datetime import datetime, timezone
 from decimal import Decimal
 
-DEFAULT_ENDPOINTS = [
-    "https://eth.drpc.org",
-    "https://ethereum-rpc.publicnode.com",
-    "https://1rpc.io/eth",
-    "https://cloudflare-eth.com",
-]
+# Access policy: Alchemy Ethereum mainnet only (see rpc-harness/policy.py).
+# The endpoint - and therefore the API key - comes from the environment.
+DEFAULT_ENV_VAR = "ALCHEMY_URL"
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                "rpc-harness"))
 
 # Module-level switch so the self-test can point every call at a local server.
 ENDPOINTS_OVERRIDE = None
+
+
+def policy_check(endpoints, allow_loopback=False):
+    """Import lazily so the tool still works if rpc-harness/policy.py is absent."""
+    try:
+        import policy
+    except ImportError:
+        for url in endpoints:
+            if "alchemy.com" not in url and not allow_loopback:
+                raise SystemExit(
+                    "off-policy endpoint %r and rpc-harness/policy.py is missing; "
+                    "policy is Alchemy Ethereum mainnet only" % url)
+        return
+    policy.enforce_endpoints([("endpoint", url) for url in endpoints],
+                             allow_loopback=allow_loopback)
 
 
 # --------------------------------------------------------------------------- #
@@ -87,7 +102,13 @@ def endpoints_from(args):
         for item in args.endpoint:
             out.extend(part.strip() for part in item.split(",") if part.strip())
         return out
-    return list(DEFAULT_ENDPOINTS)
+    from_env = os.environ.get(DEFAULT_ENV_VAR, "").strip()
+    if from_env:
+        return [from_env]
+    raise SystemExit(
+        "no endpoint. Policy is Alchemy Ethereum mainnet only, so set your project URL:\n"
+        "  export %s='https://eth-mainnet.g.alchemy.com/v2/<your-key>'\n"
+        "or pass --endpoint with another mainnet Alchemy URL." % DEFAULT_ENV_VAR)
 
 
 # --------------------------------------------------------------------------- #
@@ -256,6 +277,7 @@ def selftest():
             failures += 1
 
     global ENDPOINTS_OVERRIDE
+    policy_check([url], allow_loopback=True)
     try:
         record, errors = inspect("0x" + "11" * 32, [url])
         check("transaction resolved", record is not None, errors)
@@ -322,6 +344,12 @@ def main():
         ap.error("pass at least one --tx, or use --selftest")
 
     endpoints = endpoints_from(args)
+    try:
+        policy_check(endpoints)
+    except SystemExit:
+        raise
+    except Exception as exc:                                        # noqa: BLE001
+        raise SystemExit("access policy: %s" % exc)
     print("endpoints: %s" % ", ".join(endpoints))
 
     records, all_errors = [], []

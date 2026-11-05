@@ -89,3 +89,18 @@ connections, one 24-hour window, from AWS runners, published by one of the vendo
 harness measures the methods *you* actually call, with the historical/log filters *your*
 contract needs, at the concurrency *you* run — which is the only data that can settle a
 procurement decision. Use both: the vendor data to shortlist, this harness to sign.
+
+## Access policy — Alchemy Ethereum mainnet only (enforced)
+
+`policy.py` refuses anything that is not `https://eth-mainnet.g.alchemy.com/v2/<key>` with
+`chain_id` 1, before any request is sent. Non-Alchemy vendors, Alchemy testnets, plaintext
+http, keyless URLs and loopback nodes are rejected with a reason; `bench.py` exits **3**
+and lists every offending endpoint. Loopback is allowed only inside `--selftest`.
+
+```bash
+python3 policy.py --self-test                     # 37 assertions
+python3 policy.py --check "$ALCHEMY_URL"
+```
+
+`providers.example.json` now contains a single Alchemy entry, read from `ALCHEMY_URL`.
+Full rationale and the emergency escape hatch: [`../docs/ACCESS-POLICY.md`](../docs/ACCESS-POLICY.md).

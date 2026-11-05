@@ -47,6 +47,9 @@ import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import policy  # noqa: E402  access policy: Alchemy mainnet only
+
 
 # --------------------------------------------------------------------------- #
 # Payload templates
@@ -144,7 +147,16 @@ def rpc_call(url, method, params, timeout):
 # Benchmark driver
 # --------------------------------------------------------------------------- #
 
-def run(providers, calls, requests, timeout, pacing, outdir, verbose):
+def run(providers, calls, requests, timeout, pacing, outdir, verbose, allow_loopback=False):
+    # Fail before the first request if anything points off-policy.
+    configured = []
+    for name, spec in providers.items():
+        env_name = spec.get("url_env")
+        url = os.environ.get(env_name, "") if env_name else spec.get("url", "")
+        if url:
+            configured.append((name, url))
+    policy.enforce_endpoints(configured, allow_loopback=allow_loopback)
+
     os.makedirs(outdir, exist_ok=True)
     rows = []
     started_iso = datetime.now(timezone.utc).isoformat(timespec="seconds")
@@ -357,7 +369,8 @@ def selftest():
         with tempfile.TemporaryDirectory() as tmp:
             os.environ["SELFTEST_URL"] = url
             summary = run({"fake": {"url_env": "SELFTEST_URL"}}, calls,
-                          requests=8, timeout=5, pacing=0, outdir=tmp, verbose=False)
+                          requests=8, timeout=5, pacing=0, outdir=tmp, verbose=False,
+                          allow_loopback=True)
             check("rows = providers x methods x requests",
                   summary["meta"]["rows"] == 1 * 2 * 8, summary["meta"]["rows"])
             check("all succeeded", all(c["success_pct"] == 100.0 for c in summary["cells"]),
@@ -370,7 +383,8 @@ def selftest():
         _FakeRPC.fail_rate = 1.0
         with tempfile.TemporaryDirectory() as tmp:
             summary = run({"fake": {"url_env": "SELFTEST_URL"}}, calls,
-                          requests=4, timeout=5, pacing=0, outdir=tmp, verbose=False)
+                          requests=4, timeout=5, pacing=0, outdir=tmp, verbose=False,
+                          allow_loopback=True)
             check("all requests counted as failures",
                   all(c["failed"] == 4 and c["success_pct"] == 0.0 for c in summary["cells"]),
                   summary["cells"])
@@ -381,18 +395,35 @@ def selftest():
         os.environ["SELFTEST_URL"] = "http://127.0.0.1:1"
         with tempfile.TemporaryDirectory() as tmp:
             summary = run({"fake": {"url_env": "SELFTEST_URL"}}, calls[:1],
-                          requests=2, timeout=2, pacing=0, outdir=tmp, verbose=False)
+                          requests=2, timeout=2, pacing=0, outdir=tmp, verbose=False,
+                          allow_loopback=True)
             check("connection refused is a failure, not a crash",
                   summary["cells"][0]["success_pct"] == 0.0, summary["cells"])
             check("reason is captured", bool(summary["cells"][0]["errors"]),
                   summary["cells"][0]["errors"])
+
+        # 3b. off-policy endpoints are refused before any request
+        for label, bad_url in (
+            ("QuickNode", "https://example.quiknode.pro/abcdef123456/"),
+            ("dRPC public", "https://eth.drpc.org"),
+            ("Alchemy testnet", "https://eth-sepolia.g.alchemy.com/v2/abcdefgh12345678"),
+        ):
+            os.environ["SELFTEST_URL"] = bad_url
+            with tempfile.TemporaryDirectory() as tmp:
+                try:
+                    run({"bad": {"url_env": "SELFTEST_URL"}}, calls[:1], requests=1,
+                        timeout=2, pacing=0, outdir=tmp, verbose=False)
+                    check("policy refuses %s" % label, False, "request was attempted")
+                except policy.PolicyError as exc:
+                    check("policy refuses %s" % label, True)
+                    check("refusal names the reason (%s)" % label, "policy" in str(exc).lower(), str(exc))
 
         # 4. missing env var is skipped cleanly
         os.environ.pop("SELFTEST_URL", None)
         with tempfile.TemporaryDirectory() as tmp:
             try:
                 run({"fake": {"url_env": "SELFTEST_URL"}}, calls[:1], requests=1,
-                    timeout=2, pacing=0, outdir=tmp, verbose=False)
+                    timeout=2, pacing=0, outdir=tmp, verbose=False, allow_loopback=True)
                 check("missing endpoint aborts with a message", False, "no exception")
             except SystemExit:
                 check("missing endpoint aborts with a message", True)
@@ -430,8 +461,16 @@ def main():
     with open(args.contract, encoding="utf-8") as fh:
         contract = json.load(fh)
 
-    calls = build_calls(contract, contract.get("chain_id", 1))
-    run(providers, calls, args.requests, args.timeout, args.pacing, args.out, args.verbose)
+    try:
+        policy.check_chain_id(contract.get("chain_id", 1))
+    except policy.PolicyError as exc:
+        raise SystemExit(str(exc))
+    try:
+        run(providers, calls, args.requests, args.timeout, args.pacing, args.out, args.verbose)
+    except policy.PolicyError as exc:
+        print("\n%s" % exc, file=sys.stderr)
+        print("\nRefusing to send traffic. Policy: Alchemy Ethereum mainnet only.", file=sys.stderr)
+        return 3
     return 0
 
 
