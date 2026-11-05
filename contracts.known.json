@@ -1,0 +1,35 @@
+{
+  "_comment": "Contracts we are willing to point traffic at, and what they must answer. Authored here; the metadata was cross-checked against trustwallet/assets (MIT) via the GitHub API on 2026-11-05. Add entries deliberately - an allowlist you cannot defend is worse than none.",
+  "_sources": {
+    "provenance": "https://github.com/trustwallet/assets/tree/master/blockchains/ethereum/assets",
+    "licence": "MIT",
+    "checked": "2026-11-05",
+    "note": "Address case is the EIP-55 checksum as published; lookups are case-insensitive."
+  },
+  "1": {
+    "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48": {
+      "symbol": "USDC",
+      "decimals": 6,
+      "standard": "ERC20",
+      "issuer": "Circle / Centre"
+    },
+    "0xdAC17F958D2ee523a2206206994597C13D831ec7": {
+      "symbol": "USDT",
+      "decimals": 6,
+      "standard": "ERC20",
+      "issuer": "Tether"
+    },
+    "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2": {
+      "symbol": "WETH",
+      "decimals": 18,
+      "standard": "ERC20",
+      "issuer": "Wrapped Ether"
+    },
+    "0x6B175474E89094C44Da98b954EedeAC495271d0F": {
+      "symbol": "DAI",
+      "decimals": 18,
+      "standard": "ERC20",
+      "issuer": "MakerDAO"
+    }
+  }
+}

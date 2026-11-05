@@ -20,9 +20,14 @@ run() {
 }
 
 run "access policy (Alchemy mainnet only)"        python3 rpc-harness/policy.py --self-test
+run "runner guard (run-bench.sh refusals)"        ./tests/runner-guard.sh
+run "keccak-256 (EIP-55 / selectors)"              python3 tools/keccak.py
+run "contract pre-flight (address gate)"          python3 tools/verify_contract.py --selftest
 run "rpc-harness benchmark"                       python3 rpc-harness/bench.py --selftest
 run "transaction inspector"                       python3 tools/inspect_tx.py --selftest
 run "benchmark data tooling"                      python3 rpc-benchmarks/tests/run_tests.py
+run "cross-check tool (pywallet / Core dumps)"    python3 tools/crosscheck.py --selftest
+run "cross-check end-to-end (exit codes)"         ./tests/crosscheck-e2e.sh
 run "wallet PoC verification (26 checks)"         ./tools/run_verification.sh
 
 printf '\n\033[1m== summary ==\033[0m\n%d suite(s) passed, %d failed\n' "$pass" "$fail"

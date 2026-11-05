@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# Guards on run-bench.sh: it must refuse to run before it can waste a request,
+# and it must never accept a placeholder or a pasted markdown link as an endpoint.
+set -uo pipefail
+cd "$(dirname "$0")/.."
+
+pass=0; fail=0
+check_exit() { # check_exit <description> <expected> <actual>
+  if [ "$2" = "$3" ]; then pass=$((pass+1)); echo "PASS  $1";
+  else fail=$((fail+1)); echo "FAIL  $1 (expected exit $2, got $3)"; fi
+}
+
+env -u ALCHEMY_URL ./run-bench.sh >/dev/null 2>&1
+check_exit "unset ALCHEMY_URL is refused" 2 $?
+
+env ALCHEMY_URL='https://eth-mainnet.g.alchemy.com/v2/<key>' ./run-bench.sh >/dev/null 2>&1
+check_exit "documentation placeholder is refused" 2 $?
+
+env ALCHEMY_URL='[https://eth-mainnet.g.alchemy.com/v2/<key>](x)' ./run-bench.sh >/dev/null 2>&1
+check_exit "markdown-wrapped link is refused" 2 $?
+
+env ALCHEMY_URL='https://eth.drpc.org' ./run-bench.sh >/dev/null 2>&1
+check_exit "off-policy vendor is refused" 3 $?
+
+env ALCHEMY_URL='https://eth-sepolia.g.alchemy.com/v2/abcdefgh12345678' ./run-bench.sh >/dev/null 2>&1
+check_exit "Alchemy testnet is refused" 3 $?
+
+[ -x run-bench.sh ]; check_exit "run-bench.sh is executable" 0 $?
+
+# Contract pre-flight must stop a bad address before any request is sent.
+BAD=$(mktemp --suffix=.json)
+python3 -c "import json,sys; c=json.load(open('rpc-harness/contracts.example.json')); c['address']='0x'+'0'*39+'4'; json.dump(c, open(sys.argv[1],'w'))" "$BAD"
+env ALCHEMY_URL='https://eth-mainnet.g.alchemy.com/v2/abcdefgh12345678' ./run-bench.sh "$BAD" >/dev/null 2>&1
+check_exit "pre-flight refuses a precompile address" 4 $?
+rm -f "$BAD"
+
+python3 tools/verify_contract.py --address 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 >/dev/null 2>&1
+check_exit "the allowlisted USDC address passes pre-flight" 0 $?
+
+# Regression guard: the PoC build must keep working. tasks.mk is included, never a replacement.
+make -n noaesni >/dev/null 2>&1; check_exit "PoC target 'make noaesni' still builds" 0 $?
+grep -q '^-include tasks.mk' Makefile; check_exit "Makefile includes tasks.mk instead of replacing it" 0 $?
+grep -q '^noaesni:' Makefile; check_exit "PoC 'noaesni' target still defined in Makefile" 0 $?
+
+echo
+echo "passed: $pass, failed: $fail"
+[ "$fail" -eq 0 ]
