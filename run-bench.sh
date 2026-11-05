@@ -11,7 +11,8 @@
 #   REQUESTS=60 ./run-bench.sh                            # more samples
 #
 # Exit codes: 2 = the URL is unset or still a placeholder, 3 = off-policy endpoint,
-#             1 = benchmark produced no usable measurements, 0 = success.
+#             4 = the contract address failed pre-flight, 1 = no usable measurements,
+#             0 = success.
 set -euo pipefail
 cd "$(dirname "$0")"
 
@@ -42,6 +43,13 @@ case "$ALCHEMY_URL" in
     ;;
 esac
 
+echo "== contract pre-flight =="
+if ! python3 tools/verify_contract.py --contract-file "$CONTRACT"; then
+  echo "Refusing to benchmark: the contract address was not verified." >&2
+  exit 4
+fi
+
+echo
 echo "== access policy =="
 if ! python3 rpc-harness/policy.py --check "$ALCHEMY_URL"; then
   echo "Refusing to send traffic: endpoint is outside policy (Alchemy Ethereum mainnet only)." >&2

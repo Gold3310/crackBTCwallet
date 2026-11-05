@@ -11,7 +11,7 @@ RPC_USER ?= poctest
 RPC_PASS ?= poctest
 CONTAINER ?= btc-regtest
 
-.PHONY: help verify policy bench inspect regtest regtest-stop regtest-wallet cast act wallets crosscheck clean-runs
+.PHONY: help verify contract policy bench inspect regtest regtest-stop regtest-wallet cast act wallets crosscheck clean-runs
 
 help:
 	@printf '%s\n' \
@@ -25,6 +25,7 @@ help:
 	  '  make act               execute the workflow locally via nektos/act' \
 	  '  make wallets           generate a throwaway wallet dump' \
 	  '  make crosscheck OURS=… FROM=…   compare against pywallet / bitcoin-cli' \
+	  '  make contract ADDR=0x…  validate a contract address before mainnet traffic' \
 	  '  make clean-runs        remove local benchmark output' \
 	  '' \
 	  '  (PoC build targets are unchanged: default, noaesni, libaesni, testaes, clean)'
@@ -72,6 +73,10 @@ act:
 	@command -v act >/dev/null || { echo "act not installed: see github.com/nektos/act"; exit 1; }
 	@test -n "$(ALCHEMY_URL)" || { echo "export ALCHEMY_URL first"; exit 2; }
 	act workflow_dispatch -W .github/workflows/rpc-bench.yml -s ALCHEMY_URL="$(ALCHEMY_URL)"
+
+contract:          ## make contract ADDR=0x…   pre-flight an address before benchmarking
+	@test -n "$(ADDR)" || { echo "usage: make contract ADDR=0x…"; exit 2; }
+	python3 tools/verify_contract.py --address "$(ADDR)"
 
 crosscheck:        ## make crosscheck FROM="python3 pywallet.py --dumpwallet --wallet wallet.dat" OURS=<wif>
 	@test -n "$(OURS)" || { echo "usage: make crosscheck OURS=<wif> FROM=\"<external dump command>\""; exit 2; }

@@ -1,5 +1,5 @@
 crackBTCwallet verification log
-generated: 2026-11-05T21:46:31Z on Linux 6.1.158+ x86_64
+generated: 2026-11-05T21:57:10Z on Linux 6.1.158+ x86_64
 gcc: gcc (Debian 12.2.0-14+deb12u1) 12.2.0
 
 === 1. build (make noaesni - gcc only, no yasm) ===
@@ -73,7 +73,7 @@ PASS  compressed WIF agrees
 PASS  uncompressed WIF agrees
 
 === 6. negative test - wrong keys must not be accepted ===
-/tmp/tmp.FHjxdayDek
+/tmp/tmp.SAyR1DG7Sc
 PASS  false positives on two wrong keys
 
 === 7. wrong IV with correct key (documented defect) ===

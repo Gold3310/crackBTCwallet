@@ -1,3 +1,17 @@
+Unreleased - contract pre-flight before mainnet
+- tools/keccak.py: Keccak-256 (Ethereum padding) because hashlib only ships NIST SHA3;
+  verified against published selectors and event topics (11 checks)
+- tools/verify_contract.py: address gate run before any request - shape, zero address,
+  precompile, EIP-55 checksum, chain pin, allowlist, optional live probe (29 checks).
+  Exit 4 stops a benchmark before traffic starts; wired into run-bench.sh and bench.py.
+  The live path inherits the endpoint policy and FAILS CLOSED if policy.py cannot be imported
+  (a silent bypass was found and fixed during testing: off-policy URLs reported a network error)
+- contracts.known.json: USDC/USDT/WETH/DAI on chain 1, authored here with provenance
+  checked against trustwallet/assets (MIT) via the GitHub API
+- BUG FIX: bench.py main() passed `calls` without building it - the first live run would
+  have died with NameError. Now builds calls and the self-test pins it (25 checks, was 21)
+- tests/runner-guard.sh: +2 checks (pre-flight refuses a precompile, USDC passes)
+
 Unreleased - cross-check against a second implementation
 - tools/crosscheck.py: compares the keys we recover with pywallet --dumpwallet, bitcoin-cli
   dumpwallet, or a saved dump; names compression-flag differences specifically; --address

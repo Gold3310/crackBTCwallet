@@ -27,6 +27,16 @@ check_exit "Alchemy testnet is refused" 3 $?
 
 [ -x run-bench.sh ]; check_exit "run-bench.sh is executable" 0 $?
 
+# Contract pre-flight must stop a bad address before any request is sent.
+BAD=$(mktemp --suffix=.json)
+python3 -c "import json,sys; c=json.load(open('rpc-harness/contracts.example.json')); c['address']='0x'+'0'*39+'4'; json.dump(c, open(sys.argv[1],'w'))" "$BAD"
+env ALCHEMY_URL='https://eth-mainnet.g.alchemy.com/v2/abcdefgh12345678' ./run-bench.sh "$BAD" >/dev/null 2>&1
+check_exit "pre-flight refuses a precompile address" 4 $?
+rm -f "$BAD"
+
+python3 tools/verify_contract.py --address 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 >/dev/null 2>&1
+check_exit "the allowlisted USDC address passes pre-flight" 0 $?
+
 # Regression guard: the PoC build must keep working. tasks.mk is included, never a replacement.
 make -n noaesni >/dev/null 2>&1; check_exit "PoC target 'make noaesni' still builds" 0 $?
 grep -q '^-include tasks.mk' Makefile; check_exit "Makefile includes tasks.mk instead of replacing it" 0 $?

@@ -21,6 +21,8 @@ run() {
 
 run "access policy (Alchemy mainnet only)"        python3 rpc-harness/policy.py --self-test
 run "runner guard (run-bench.sh refusals)"        ./tests/runner-guard.sh
+run "keccak-256 (EIP-55 / selectors)"              python3 tools/keccak.py
+run "contract pre-flight (address gate)"          python3 tools/verify_contract.py --selftest
 run "rpc-harness benchmark"                       python3 rpc-harness/bench.py --selftest
 run "transaction inspector"                       python3 tools/inspect_tx.py --selftest
 run "benchmark data tooling"                      python3 rpc-benchmarks/tests/run_tests.py

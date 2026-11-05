@@ -43,6 +43,7 @@ import sys
 import tempfile
 import threading
 import time
+from pathlib import Path
 import urllib.error
 import urllib.request
 from datetime import datetime, timezone
@@ -431,11 +432,53 @@ def selftest():
         server.shutdown()
 
     print()
+    # regression: main() must build the call list, and the contract gate must bite
+    example_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "contracts.example.json")
+    try:
+        with open(example_path, encoding="utf-8") as fh:
+            example = json.load(fh)
+        check("example config builds calls", len(build_calls(example, 1)) > 0)
+        check("example contract passes pre-flight", contract_preflight(example) == 0, "expected 0")
+        check("precompile refused by pre-flight",
+              contract_preflight(dict(example, address="0x" + "0" * 39 + "4")) == 4, "expected 4")
+        check("bad checksum refused by pre-flight",
+              contract_preflight(dict(example, address="0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB49")) == 4,
+              "expected 4")
+    except FileNotFoundError:
+        check("example config available", False, example_path)
+
     print("passed: %d, failed: %d (of %d checks)" % (total - failures, failures, total))
     return 0 if failures == 0 else 1
 
 
 # --------------------------------------------------------------------------- #
+
+
+def contract_preflight(contract):
+    """Refuse a contract address that cannot be shown sane, before any request is sent.
+
+    A pasted address is the cheapest thing to get wrong: a typo, a testnet address or a
+    precompile all produce a benchmark of nothing. Returns 0 to continue, 4 to stop.
+    """
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tools"))
+    try:
+        import verify_contract
+    except Exception as exc:                      # tools/ absent or broken - do not block
+        print("note: contract pre-flight unavailable (%s)" % exc, file=sys.stderr)
+        return 0
+    report = verify_contract.offline_check(contract.get("address"), contract.get("chain_id", 1))
+    if report["ok"]:
+        known = report.get("known")
+        print("contract pre-flight: %s ok%s" % (
+            report["normalised"], ", %s (%d decimals)" % (known["symbol"], known["decimals"]) if known else ""))
+        return 0
+    print("\ncontract pre-flight REFUSED %r:" % (contract.get("address"),), file=sys.stderr)
+    for c in report["checks"]:
+        if not c["ok"]:
+            print("  %s: %s" % (c["name"], c["detail"]), file=sys.stderr)
+    print("\nRefusing to benchmark an unverified contract address.", file=sys.stderr)
+    return 4
+
 
 def main():
     ap = argparse.ArgumentParser(
@@ -465,6 +508,10 @@ def main():
         policy.check_chain_id(contract.get("chain_id", 1))
     except policy.PolicyError as exc:
         raise SystemExit(str(exc))
+    preflight = contract_preflight(contract)
+    if preflight:
+        return preflight
+    calls = build_calls(contract, contract.get("chain_id", 1))
     try:
         run(providers, calls, args.requests, args.timeout, args.pacing, args.out, args.verbose)
     except policy.PolicyError as exc:
