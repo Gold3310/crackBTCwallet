@@ -33,3 +33,6 @@ testaes:
 	gcc -Wall -O3 -fPIC -c ctaes/ctaes.c -o ctaes.o
 	gcc -Wall -c tested_aes.c -o tested_aes.o
 	gcc -o tested_aes tested_aes.o ctaes.o intel_aes.o do_rdtsc.o iaesx64.o -pthread
+
+# RPC harness / docs / runtime entry points (see docs/PRIOR-ART.md)
+-include tasks.mk
